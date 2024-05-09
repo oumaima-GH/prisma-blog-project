@@ -92,7 +92,7 @@ const deleteArticle = async (req, res) => {
                 id: articleId,
             },
         });
-        res.status(204).send(); // No content
+        res.status(204).send(); 
     } catch (error) {
         console.error("Error deleting article:", error);
         res.status(500).json({ error: "Failed to delete article" });
