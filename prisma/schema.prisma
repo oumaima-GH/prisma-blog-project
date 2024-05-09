@@ -39,7 +39,7 @@ model Article {
   updated_at DateTime  @default(now())
   comments   Comment[]
   users      User      @relation(fields: [authorId], references: [id])
-  authorId   Int       @unique
+  authorId   Int
 
   CategoriesOnArticles CategoriesOnArticles[]
 }
