@@ -7,11 +7,14 @@ const prisma = new PrismaClient();
 
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await prisma.category.findMany();
+    const categories = await prisma.category.findMany({
+      // relationLoadStrategy: "join",
+      // include: { articles: true, users: true},
+    });
     res.status(200).json(categories);
 } catch (error) {
     console.error("Error fetching categories:", error);
-    res.status(500).json({ error: "Failed to fetch categories" });
+    res.status(500).json({message: error.message });
 }
 }
 
@@ -20,6 +23,7 @@ const getCategoryById = async (req, res) => {
   const categoryId = parseInt(req.params.categoryId);
   try {
       const category = await prisma.category.findUnique({
+        // include: { articles: true, users: true},
           where: {
               id: categoryId,
           },
@@ -27,7 +31,7 @@ const getCategoryById = async (req, res) => {
       res.status(200).json(category);
   } catch (error) {
       console.error("Error fetching category:", error);
-      res.status(500).json({ error: "Failed to fetch category" });
+      res.status(500).json({ message: error.message });
   }
 }
 
@@ -44,7 +48,7 @@ const createCategory = async (req, res) => {
       res.status(201).json(category);
     } catch (error) {
       console.error("Error creating category:", error);
-      res.status(500).json({ error: "Failed to create category" });
+      res.status(500).json({ error: "Failed to create category", message: error.message });
     }
   }
   
@@ -64,7 +68,7 @@ const updateCategory = async (req, res) => {
       res.status(200).json(updatedCategory);
     } catch (error) {
       console.error("Error updating category:", error);
-      res.status(500).json({ error: "Failed to update category" });
+      res.status(500).json({ error: "Failed to update category", message: error.message });
     }
   }
   
@@ -80,7 +84,7 @@ const updateCategory = async (req, res) => {
       res.status(204).send(); 
     } catch (error) {
       console.error("Error deleting category:", error);
-      res.status(500).json({ error: "Failed to delete category" });
+      res.status(500).json({ error: "Failed to delete category", message: error.message });
     }
   }
   

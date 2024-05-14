@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -69,6 +70,7 @@ model CategoriesOnArticles {
 
 model Comment {
   id         Int      @id @default(autoincrement())
+  email      String
   content    String
   created_at DateTime @default(now())
   updated_at DateTime @default(now())

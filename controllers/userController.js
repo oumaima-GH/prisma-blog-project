@@ -5,11 +5,19 @@ const prisma = new PrismaClient();
 // Get all users
 const getAllUsers = async (req, res) => {
     try {
-        const users = await prisma.user.findMany();
-        res.status(200).json(users);
+        const users = await prisma.user.findMany({
+            // relationLoadStrategy: "join",
+            include: { articles: true, comments: true }
+        });
+        res.status(200).json({
+            status: "success",
+            data: users
+        });
     } catch (error) {
-        console.error("Error fetching users:", error);
-        res.status(500).json({ error: "Failed to fetch users" });
+       
+        res.status(500).json({
+             message: error.message,
+             });
     }
 }
 
@@ -18,6 +26,7 @@ const getUserById = async (req, res) => {
     const userId = parseInt(req.params.userId);
     try {
         const user = await prisma.user.findUnique({
+            include: { article: true},
             where: {
                 id: userId,
             },
@@ -25,7 +34,7 @@ const getUserById = async (req, res) => {
         res.status(200).json(user);
     } catch (error) {
         console.error("Error fetching user:", error);
-        res.status(500).json({ error: "Failed to fetch user" });
+        res.status(500).json({ error: "Failed to fetch user", message: error.message});
     }
 }
 
@@ -44,7 +53,7 @@ const createUser = async (req, res) => {
         res.status(201).json(user);
     } catch (error) {
         console.error("Error creating user:", error);
-        res.status(500).json({ error: "Failed to create user" });
+        res.status(500).json({ error: "Failed to create user", message: error.message});
     }
 }
 
@@ -67,7 +76,7 @@ const updateUser = async (req, res) => {
         res.status(200).json(updatedUser);
     } catch (error) {
         console.error("Error updating user:", error);
-        res.status(500).json({ error: "Failed to update user" });
+        res.status(500).json({ error: "Failed to update user", message: error.message});
     }
 }
 
@@ -83,7 +92,7 @@ const deleteUser = async (req, res) => {
         res.status(204).send(); 
     } catch (error) {
         console.error("Error deleting user:", error);
-        res.status(500).json({ error: "Failed to delete user" });
+        res.status(500).json({ error: "Failed to delete user", message: error.message});
     }
 }
 

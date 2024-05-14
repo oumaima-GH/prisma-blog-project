@@ -4,11 +4,14 @@ const prisma = new PrismaClient();
 // Get all comments
 const getAllComments = async (req, res) => {
     try {
-        const comments = await prisma.comment.findMany();
+        const comments = await prisma.comment.findMany({
+            // relationLoadStrategy: "join",
+            include: { users: true, articles: true }
+        });
         res.status(200).json(comments);
     } catch (error) {
         console.error("Error fetching comments:", error);
-        res.status(500).json({ error: "Failed to fetch comments" });
+        res.status(500).json({ error: "Failed to fetch comments", message: error.message });
     }
 }
 
@@ -17,6 +20,7 @@ const getCommentsByArticleId = async (req, res) => {
     const articleId = parseInt(req.params.articleId);
     try {
         const comments = await prisma.comment.findMany({
+            include: { users: true, articles: true },
             where: {
                 articleId: articleId,
             },
@@ -24,7 +28,7 @@ const getCommentsByArticleId = async (req, res) => {
         res.status(200).json(comments);
     } catch (error) {
         console.error("Error fetching comments for article:", error);
-        res.status(500).json({ error: "Failed to fetch comments for article" });
+        res.status(500).json({ error: "Failed to fetch comments for article", message: error.message});
     }
 }
 
@@ -40,7 +44,7 @@ const createComment = async (req, res) => {
         });
 
         if (!existingUser) {
-            return res.status(404).json({ error: "User not found" });
+            return res.status(404).json({ error: "User not found", message: error.message});
         }
 
         const existingArticle = await prisma.article.findUnique({
@@ -50,7 +54,7 @@ const createComment = async (req, res) => {
         });
 
         if (!existingArticle) {
-            return res.status(404).json({ error: "Article not found" });
+            return res.status(404).json({ error: "Article not found", message: error.message});
         }
 
         const comment = await prisma.comment.create({
@@ -64,7 +68,7 @@ const createComment = async (req, res) => {
         res.status(201).json(comment);
     } catch (error) {
         console.error("Error creating comment:", error);
-        res.status(500).json({ error: "Failed to create comment" });
+        res.status(500).json({ error: "Failed to create comment", message: error.message});
     }
 }
 
@@ -84,7 +88,7 @@ const updateComment = async (req, res) => {
         res.status(200).json(updatedComment);
     } catch (error) {
         console.error("Error updating comment:", error);
-        res.status(500).json({ error: "Failed to update comment" });
+        res.status(500).json({ error: "Failed to update comment", message: error.message});
     }
 }
 
@@ -100,7 +104,7 @@ const deleteComment = async (req, res) => {
         res.status(204).send(); 
     } catch (error) {
         console.error("Error deleting comment:", error);
-        res.status(500).json({ error: "Failed to delete comment" });
+        res.status(500).json({ error: "Failed to delete comment", message: error.message});
     }
 }
 
