@@ -1,5 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
-const { join } = require('@prisma/client/runtime/library');
+// const { join } = require('@prisma/client/runtime/library');
 const prisma = new PrismaClient();
 
 // Get all articles
