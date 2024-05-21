@@ -35,11 +35,11 @@ const getCommentsByArticleId = async (req, res) => {
 // Create comment
 const createComment = async (req, res) => {
     try {
-        const { content, userId, articleId } = req.body;
+        const { content, authorId, articleId } = req.body;
 
         const existingUser = await prisma.user.findUnique({
             where: {
-                id: parseInt(userId)
+                id: parseInt(authorId)
             }
         });
 
@@ -60,7 +60,7 @@ const createComment = async (req, res) => {
         const comment = await prisma.comment.create({
             data: {
                 content,
-                userId: parseInt(userId),
+                authorId: parseInt(authorId),
                 articleId: parseInt(articleId),
             }
         });

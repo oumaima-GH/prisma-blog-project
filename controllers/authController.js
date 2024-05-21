@@ -1,8 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-// const dotenv = require('dotenv');
-// dotenv.config();
+const dotenv = require('dotenv');
+dotenv.config();
+const SECRET_KEY =  process.env.SECRET_KEY;
+
 
 const prisma = new PrismaClient();
 
@@ -29,7 +31,7 @@ const register = async (req, res) => {
             }
         });
 
-        const token = jwt.sign({ userId: user.id, role: user.role }, 'SECRET_KEY', { expiresIn: '24h' });
+        const token = jwt.sign({ userId: user.id, role: user.role }, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE });
 
         res.status(201).json({ token, user });
     } catch (error) {
@@ -55,9 +57,9 @@ const login = async (req, res) => {
         if (!validPassword) {
             return res.status(401).json({ error: 'Invalid password' });
         }
-
-        const token = jwt.sign({ userId: user.id, role: user.role }, 'SECRET_KEY', { expiresIn: '24h' });
-
+        const token = jwt.sign({ userId: user.id, role: user.role }, SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE });
+        
+        console.log(process.env.JWT_EXPIRE)
         // res.status(200).json({ token, user });
         res.status(200).json({
             message: 'logged in successfully',

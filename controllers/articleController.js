@@ -39,11 +39,11 @@ const getArticleById = async (req, res) => {
 // Create article
 const createArticle = async (req, res) => {
     try {
-        const { title, content, image, role, userId } = req.body;
+        const { title, content, image, role, authorId } = req.body;
 
         const existingUser = await prisma.user.findUnique({
             where: {
-                id: parseInt(userId)
+                id: parseInt(authorId)
             }
         });
 
@@ -57,7 +57,7 @@ const createArticle = async (req, res) => {
                 content,
                 image,
                 role,
-                authorId: parseInt(userId),
+                authorId: parseInt(authorId),
             }
         });
 

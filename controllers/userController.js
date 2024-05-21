@@ -23,12 +23,12 @@ const getAllUsers = async (req, res) => {
 
 // Get user by ID
 const getUserById = async (req, res) => {
-    const userId = parseInt(req.params.userId);
+    const authorId = parseInt(req.params.authorId);
     try {
         const user = await prisma.user.findUnique({
             include: { article: true},
             where: {
-                id: userId,
+                id: authorId,
             },
         });
         res.status(200).json(user);
@@ -59,12 +59,12 @@ const createUser = async (req, res) => {
 
 // Update user by ID
 const updateUser = async (req, res) => {
-    const userId = parseInt(req.params.userId);
+    const authorId = parseInt(req.params.authorId);
     try {
         const { name, email, password, role } = req.body;
         const updatedUser = await prisma.user.update({
             where: {
-                id: userId,
+                id: authorId,
             },
             data: {
                 name,
@@ -82,11 +82,11 @@ const updateUser = async (req, res) => {
 
 // Delete user by ID
 const deleteUser = async (req, res) => {
-    const userId = parseInt(req.params.userId);
+    const authorId = parseInt(req.params.authorIdId);
     try {
         await prisma.user.delete({
             where: {
-                id: userId,
+                id: authorId,
             },
         });
         res.status(204).send(); 

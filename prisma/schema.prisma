@@ -4,84 +4,65 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["relationJoins"]
-}
-
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-//User
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
 
 model User {
-  id         Int       @id @default(autoincrement())
-  name       String
-  email      String    @unique
-  password   String
-  role       Role      @default(guest)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now())
-  articles   Article[]
-  comments   Comment[]
-}
-
-//Atricle
-
-model Article {
-  id         Int       @id @default(autoincrement())
-  title      String
-  content    String
-  image      String
-  role       Role      @default(author)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now())
-  comments   Comment[]
-  users      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId   Int
-
-  CategoriesOnArticles CategoriesOnArticles[]
-}
-
-//Category 
-
-model Category {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  created_at           DateTime               @default(now())
-  updated_at           DateTime               @default(now())
-  CategoriesOnArticles CategoriesOnArticles[]
-}
-
-model CategoriesOnArticles {
-  articles   Article  @relation(fields: [articleId], references: [id])
-  articleId  Int
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId Int
-  assignedAt DateTime @default(now())
-  assignedBy String
-
-  @@id([articleId, categoryId])
-}
-
-//Comments
-
-model Comment {
-  id         Int      @id @default(autoincrement())
-  email      String
-  content    String
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  users      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     Int      @unique
-  articles   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  articleId  Int      @unique
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(200)
+  email    String    @unique @db.VarChar(200)
+  password String    @db.VarChar(200)
+  role     Role      @default(guest)
+  articles Article[]
 }
 
 enum Role {
   guest
-  author
   admin
+  author
+}
+
+model Article {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(200)
+  content   String   @db.VarChar(200)
+  image     String
+  createdAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
+  published Boolean  @default(false)
+
+  author     User        @relation(fields: [authorId], references: [id])
+  authorId   Int
+  comments   Comment[]
+  categories Categorie[]
+}
+
+model Categorie {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(200)
+  createdAt DateTime  @default(now()) @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
+  articles  Article[]
+}
+
+// model _ArticleToCategorie {
+
+// }
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  email     String   @db.VarChar(200)
+  content   String   @db.VarChar(200)
+  createdAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
+
+  article   Article @relation(fields: [articleId], references: [id])
+  articleId Int
 }

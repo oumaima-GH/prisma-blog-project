@@ -6,14 +6,15 @@ const userRouter = require('./routers/userRouter')
 const articleRouter = require('./routers/articleRouter')
 const commentRouter = require('./routers/commentRouter')
 const categoryRouter = require('./routers/categoryRouter')
+const {isAuthorized, isAuthenticated} = require('./middleware/authMiddleware')
 
 app.use(express.json())
 
-app.use('/api', authRouter)
-app.use('/api', userRouter)
-app.use('/api', articleRouter)
-app.use('/api', commentRouter)
-app.use('/api', categoryRouter)
+app.use('/api/v1', authRouter)
+app.use('/api/v1', isAuthenticated ,isAuthorized('author', 'admin'),userRouter)
+app.use('/api/v1', isAuthenticated ,isAuthorized('author'), articleRouter)
+app.use('/api/v1', isAuthenticated, commentRouter)
+app.use('/api/v1', isAuthenticated,isAuthorized('admin'), categoryRouter)
 
 
 module.exports = app;
