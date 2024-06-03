@@ -8,7 +8,7 @@ const { getAllUsers, getUserById, createUser, updateUser, deleteUser } = require
 router.route('/users').get( getAllUsers).post(createUser);
 
 //get user by id
-router.route('/users/:id').get(getUserById).put(updateUser).delete(deleteUser);
+router.route('/users/:userId').get(getUserById).put(updateUser).delete(deleteUser);
 
 module.exports = router;
 

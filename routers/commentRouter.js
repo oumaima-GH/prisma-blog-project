@@ -4,6 +4,7 @@ const { getAllComments, getCommentsByArticleId, createComment, updateComment, de
 
 router.route('/comments').get(getAllComments).post(createComment);
 
-router.route('/comments/:articleId').get(getCommentsByArticleId).put(updateComment).delete(deleteComment);
+router.route('/comments/:articleId').get(getCommentsByArticleId);
+router.route('/comments/:commentId').put(updateComment).delete(deleteComment);
 
 module.exports = router;

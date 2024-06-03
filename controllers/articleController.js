@@ -1,96 +1,127 @@
 const { PrismaClient } = require('@prisma/client');
-// const { join } = require('@prisma/client/runtime/library');
 const prisma = new PrismaClient();
+const path = require('path');
 
 // Get all articles
 const getAllArticles = async (req, res) => {
     try {
-        const articles = await prisma.article.findMany(
-            {
-            //     relationLoadStrategy: "join",
-                include: { users: true }
-            }
-        );
-        
-        res.status(200).json(articles);
+        const articles = await prisma.article.findMany({
+            include: { author: true }
+        });
+
+        // Map through articles and construct image URLs
+        const articlesWithImageURLs = articles.map(article => ({
+            ...article,
+            imageUrl: article.image ? path.join('/uploads', article.image) : null,
+        }));
+
+        res.status(200).json({
+            status: 'success',
+            count: articlesWithImageURLs.length,
+            articles: articlesWithImageURLs
+        });
     } catch (error) {
-        console.error("Error fetching articles:", error);
-        res.status(500).json({ error: "Failed to fetch articles", Message: error.message });
+        res.status(400).json({
+            status: 'fail',
+            message: error.message
+        });
     }
-}
+};
 
 // Get article by ID
 const getArticleById = async (req, res) => {
     const articleId = parseInt(req.params.articleId);
     try {
         const article = await prisma.article.findUnique({
-            include: { users: true },
-            where: {
-                id: articleId,
-            },
+            include: { author: true },
+            where: { id: articleId },
         });
-        res.status(200).json(article);
+        if (!article) {
+            return res.status(404).json({ status: 'fail', message: 'Article not found' });
+        }
+        // Construct image URL if image exists
+        const imageUrl = article.image ? path.join('/uploads', article.image) : null;
+        res.status(200).json({
+            status: 'success',
+            data: {
+                ...article,
+                imageUrl: imageUrl,
+            }
+        });
     } catch (error) {
-        console.error("Error fetching article:", error);
-        res.status(500).json({ error: "Failed to fetch article", message: error.message});
+        res.status(400).json({
+            status: 'fail',
+            message: error.message
+        });
     }
-}
+};
 
 // Create article
 const createArticle = async (req, res) => {
     try {
-        const { title, content, image, role, authorId } = req.body;
-
-        const existingUser = await prisma.user.findUnique({
-            where: {
-                id: parseInt(authorId)
-            }
+      const { title, content } = req.body;
+      const author = req.user;
+  
+     
+      let image;
+      if (req.file) {
+        image = req.file.filename.replace(/\\/g, '/');
+      }
+  
+      if (!title || !content || !author) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Title, content, and author are required',
         });
-
-        if (!existingUser) {
-            return res.status(404).json({ error: "User not found", message: error.message});
-        }
-
-        const article = await prisma.article.create({
-            data: {
-                title,
-                content,
-                image,
-                role,
-                authorId: parseInt(authorId),
-            }
-        });
-
-       
-
-        res.status(201).json(article);
+      }
+  
+      const newArticle = await prisma.article.create({
+        data: {
+          title,
+          image,
+          content,
+          authorId: author.id,
+        },
+        include: { author: true, categories: true },
+      });
+  
+      res.status(201).json({
+        status: 'success',
+        data: newArticle,
+      });
     } catch (error) {
-        console.error("Error creating article:", error);
-        res.status(500).json({ error: "Failed to create article", message: error.message});
+      res.status(400).json({
+        status: 'fail',
+        message: error.message,
+      });
     }
-}
-
+  };
 // Update article by ID
 const updateArticle = async (req, res) => {
     const articleId = parseInt(req.params.articleId);
     try {
-        const { title, content, image, role } = req.body;
+        const { title, content } = req.body;
+
+        let image;
+        if (req.file) {
+            image = req.file.filename.replace(/\\/g, '/');
+        }
+
         const updatedArticle = await prisma.article.update({
-            where: {
-                id: articleId,
-            },
-            data: {
-                title,
-                content,
-                image,
-                role,
-                
-            },
+            where: { id: articleId },
+            data: { title, content, image },
+            include: { author: true, categories: true }
         });
-        res.status(200).json(updatedArticle);
+
+        res.status(200).json({
+            status: "success",
+            data: updatedArticle
+        });
     } catch (error) {
-        console.error("Error updating article:", error);
-        res.status(500).json({ error: "Failed to update article", message: error.message});
+        res.status(400).json({
+            status: "fail",
+            message: error.message
+        });
     }
 }
 
@@ -98,15 +129,19 @@ const updateArticle = async (req, res) => {
 const deleteArticle = async (req, res) => {
     const articleId = parseInt(req.params.articleId);
     try {
-        await prisma.article.delete({
-            where: {
-                id: articleId,
-            },
+        const deletedArticle = await prisma.article.delete({
+            where: { id: articleId }
         });
-        res.status(204).send(); 
+
+        res.status(204).json({
+            status: "success",
+            data: deletedArticle
+        });
     } catch (error) {
-        console.error("Error deleting article:", error);
-        res.status(500).json({ error: "Failed to delete article", message: error.message});
+        res.status(400).json({
+            status: "fail",
+            message: error.message
+        });
     }
 }
 
